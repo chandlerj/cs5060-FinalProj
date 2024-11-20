@@ -7,7 +7,7 @@ class Bus():
         self.departureTime:      datetime      = self.__getTrueDepartureTime(scheduledDeparture)
         self.battery_capacity:   float         = battery_capacity
         self.__current_capacity: float         = self.init_curr_capacity()
-        self.current_soc:        float         = lambda _: int((self.__current_capacity / self.battery_capacity) * 100)
+        self.current_soc:        function      = lambda _: int((self.__current_capacity / self.battery_capacity) * 100)
 
 
     def __getTrueArrivalTime(self, scheduledArrival):
