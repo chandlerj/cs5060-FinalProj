@@ -20,13 +20,23 @@ class Main:
     def __make_decision_maker(self, d_maker: str, sim_state: SimState):
         if d_maker.lower() == "naive":
             return NaiveDM(sim_state)
+        # TODO: Replace these with the actual simulation environments
+        elif d_maker.lower() == "rule-based":
+            return DecisionMaker(sim_state)
+        elif d_maker.lower() == "rl":
+            return DecisionMaker(sim_state)
         else:
-            raise NotImplementedError("")
+            raise NotImplementedError(f"Decision maker ${d_maker} is not a valid decision maker")
             
     def run_sim(self):
-
+        pass
 
 
 if __name__ == "__main__":
-    main = Main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+    if len(sys.argv) == 4:
+#                   decision maker  number of chargers  number of busses 
+        main = Main(sys.argv[1],    int(sys.argv[2]),   int(sys.argv[3]))
+    else:
+        main = Main("naive", 5, 4)
         
+    main.run_sim()

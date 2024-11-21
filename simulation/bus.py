@@ -2,12 +2,13 @@ from time import datetime
 
 class Bus():
     
-    def __init__(self, scheduledArrival: datetime, scheduledDeparture: datetime, battery_capacity: float):
+    def __init__(self, scheduledArrival: datetime, scheduledDeparture: datetime, battery_capacity: float, desired_soc: int):
         self.arrivalTime:        datetime      = self.__getTrueArrivalTime(scheduledArrival)
         self.departureTime:      datetime      = self.__getTrueDepartureTime(scheduledDeparture)
         self.battery_capacity:   float         = battery_capacity
         self.__current_capacity: float         = self.init_curr_capacity()
-        self.current_soc:        function      = lambda _: int((self.__current_capacity / self.battery_capacity) * 100)
+        self.desired_soc:        int           = desired_soc
+        self.current_soc:        function      = lambda : int((self.__current_capacity / self.battery_capacity) * 100)
 
 
     def __getTrueArrivalTime(self, scheduledArrival):
@@ -26,9 +27,10 @@ class Bus():
         """
         pass
 
-    def charge(amount: float) -> bool:
+    def charge(self, amount: float) -> bool:
         """
         add a certain amount of power to the bus in Kw/h
         return True if battery can accept charge
         return False if amount added exceeds amount available
         """
+        return True
