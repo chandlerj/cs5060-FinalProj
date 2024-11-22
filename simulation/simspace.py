@@ -1,9 +1,7 @@
 from bus import Bus
-from decisionMaker import DecisionMaker
 from charger import Charger
 from datetime import datetime
 from priceSchedule import PriceSchedule
-from simulation.naiveDM import NaiveDM
 
 NUM_CHARGERS = 10
 NUM_CONNECTORS = 2
