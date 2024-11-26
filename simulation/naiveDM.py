@@ -16,7 +16,7 @@ class NaiveDM(DecisionMaker):
 
     def __calc_charge_rates(self) -> None: 
         right_now = self.state.current_time
-        hours_remaining = timedelta(self.state.end_schedule - right_now).seconds // 3600
+        hours_remaining = (self.state.end_schedule - right_now).seconds // 3600
         for charger in self.state.chargers:
             for connector in charger.connectors:
                 if connector.connected_to != None:

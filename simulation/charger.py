@@ -83,6 +83,10 @@ class Charger:
         Current Draw: {self.current_draw}
         """
         print(charger_metrics)
+        for connector in self.connectors:
+            connector.print_metrics()
+            if connector.active():
+                connector.connected_to.print_metrics()
 
 if __name__ == "__main__":
     test_charger = Charger("new charger", 20, 150, 2, 1)

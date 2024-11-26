@@ -38,5 +38,5 @@ if __name__ == "__main__":
         main = Main(sys.argv[1],    int(sys.argv[2]),   int(sys.argv[3]))
     else:
         main = Main("naive", 5, 4)
-        
+        main.sim_state.print_metrics()
     main.run_sim()
