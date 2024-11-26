@@ -24,3 +24,6 @@ class PriceSchedule:
             return the price float value
         """
         pass
+
+    def generatePriceList(self):
+        pass

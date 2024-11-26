@@ -1,3 +1,5 @@
+from typing import List
+
 from bus import Bus
 from charger import Charger
 from datetime import datetime
@@ -16,16 +18,16 @@ DESIRED_SOC = 1
 
 class SimState():
     def __init__(self, start_schedule, end_schedule) -> None:
-        self.chargers:       list[Charger]  = self.__initialize_chargers(NUM_CHARGERS, MIN_POWER, MAX_POWER,
+        self.chargers:       List[Charger]  = self.__initialize_chargers(NUM_CHARGERS, MIN_POWER, MAX_POWER,
                                                                          NUM_CONNECTORS)
-        self.busses:         list[Bus]      = self.__initialize_buses()
+        self.busses:         List[Bus]      = self.__initialize_buses()
         self.start_schedule: datetime       = start_schedule
         self.end_schedule:   datetime       = end_schedule
         self.current_time:   datetime       = self.start_schedule
         self.price_schedule: PriceSchedule  = self.__initialize_price_schedule(TIMESTEP_DURATION, MAX_RATE, MIN_RATE)
 
     def __initialize_chargers(self, num_chargers: int, min_power: float, max_power: float, num_connectors: int)\
-            -> list[Charger]:
+            -> List[Charger]:
         """
         Initialize a set of chargers which make up a bus deport
         """
@@ -37,10 +39,8 @@ class SimState():
         """
         return charger_list
 
-    def generatePriceList(self):
-        pass
 
-    def __initialize_buses(self) -> list[Bus]:
+    def __initialize_buses(self) -> List[Bus]:
         bus_list = []
         for bus in range(0, 20):
             bus_list[bus] = Bus(self.start_schedule, self.end_schedule, BATTERY_CAPACITY, DESIRED_SOC)
