@@ -8,11 +8,15 @@ from datetime import datetime, timedelta
 class Charger:
 
     def __init__(self, charger_id, min_power, max_power, num_connectors, timestep_scale):
-        self.connectors:  list[Connector] = self.__initialize_connectors(min_power, max_power, num_connectors, timestep_scale)
+        self.connectors:  list[Connector] = self.__initialize_connectors(
+                min_power, 
+                max_power, 
+                num_connectors, 
+                timestep_scale
+                )
         self.charger_id:  str             = charger_id
         self.meter_count: int             = 0
         self.current_draw:float           = 0.0
-    
 
     def connect_bus(self, bus: Bus) -> bool:
         """
@@ -60,6 +64,11 @@ class Charger:
             return False 
 
         self.connectors[connector_id].update_charge_rate(rate)
+
+        # go through current charge rate of each connector to calculate the total power draw of the charger
+        self.current_draw = 0.0
+        for connector in self.connectors:
+            self.current_draw += connector.curr_power_delivery
         return True
 
     def __initialize_connectors(self, min_power: float, max_power: float, num_connectors: int, timestep_scale) -> list[Connector]:
@@ -103,7 +112,7 @@ if __name__ == "__main__":
     
     print("Connector stats after connecting bus")
     for connector in test_charger.connectors:
-       connector.print_metrics()
+        connector.print_metrics()
 
 
     print("Disconnecting Bus")
@@ -111,6 +120,6 @@ if __name__ == "__main__":
 
     print("Connector stats after disconnecting bus")
     for connector in test_charger.connectors:
-       connector.print_metrics()
+        connector.print_metrics()
 
 

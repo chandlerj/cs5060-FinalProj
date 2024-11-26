@@ -5,28 +5,32 @@ from priceSchedule import PriceSchedule
 from datetime import datetime, timedelta
 from typing import List
 
-NUM_CHARGERS = 10
-NUM_CONNECTORS = 2
-MIN_POWER = 0
-MAX_POWER = 1
-TIMESTEP_DURATION = 1
-MAX_RATE = 1
-MIN_RATE = 0
-BATTERY_CAPACITY = 100
-DESIRED_SOC = 1
 
 
 class SimState():
-    def __init__(self, start_schedule, end_schedule) -> None:
+    def __init__(self, 
+                 start_schedule, 
+                 end_schedule, 
+                 num_chargers=5,
+                 num_connectors=2,
+                 num_buses=6,
+                 min_power=0,
+                 max_power=1000,
+                 timestep_duration=1,
+                 max_rate=0.24,
+                 min_rate=0.08,
+                 battery_capacity=588,
+                 desired_soc=90
+                 ) -> None:
         self.start_schedule: datetime       = start_schedule
         self.end_schedule:   datetime       = end_schedule
         self.current_time:   datetime       = self.start_schedule
-        self.price_schedule: PriceSchedule  = self.__initialize_price_schedule(TIMESTEP_DURATION, MAX_RATE, MIN_RATE)
-        self.chargers:       List[Charger]  = self.__initialize_chargers(NUM_CHARGERS, 
-                                                                         MIN_POWER, 
-                                                                         MAX_POWER,
-                                                                         NUM_CONNECTORS)
-        self.busses:         List[Bus]      = self.__initialize_buses()
+        self.price_schedule: PriceSchedule  = self.__initialize_price_schedule(timestep_duration, max_rate, min_rate)
+        self.chargers:       List[Charger]  = self.__initialize_chargers(num_chargers, 
+                                                                         min_power, 
+                                                                         max_power,
+                                                                         num_connectors)
+        self.busses:         List[Bus]      = self.__initialize_buses(num_buses, battery_capacity, desired_soc)
 
 
     def __initialize_chargers(self, num_chargers: int, min_power: float, max_power: float, num_connectors: int)\
@@ -42,28 +46,41 @@ class SimState():
         return charger_list
 
 
-    def __initialize_buses(self) -> List[Bus]:
+    def __initialize_buses(self, num_buses, battery_capacity, desired_soc) -> list[Bus]:
         bus_list = []
-        for _ in range(0, 20):
+        for _ in range(0, num_buses):
             bus_list.append(Bus(
                 self.start_schedule, 
                 self.end_schedule, 
-                BATTERY_CAPACITY, 
-                DESIRED_SOC
+                battery_capacity, 
+                desired_soc
                 )
             )
         return bus_list
 
     def __initialize_price_schedule(self, timestep_duration, max_rate, min_rate) -> PriceSchedule:
-        return PriceSchedule(timestep_duration, max_rate, min_rate)
+        return PriceSchedule(
+                timestep_duration, 
+                max_rate, 
+                min_rate, 
+                self.start_schedule, 
+                self.end_schedule
+                )
     
     def print_metrics(self):
+        print("SIMULATION STATS")
         sim_stats = f"""
         start datetime: {self.start_schedule}
         end datetime: {self.end_schedule}
         current datetime: {self.current_time}
         """
         print(sim_stats)
+        print("BUS INFORMATION")
+        for bus in self.busses:
+            bus.print_metrics()
+        print("PRICING INFORMATION")
+        self.price_schedule.print_metrics()
+        print("CHARGER INFORMATION")
         for charger in self.chargers:
             charger.print_metrics()
 
