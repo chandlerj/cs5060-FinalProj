@@ -60,9 +60,9 @@ class SimState():
 
     def __initialize_price_schedule(self, timestep_duration, max_rate, min_rate) -> PriceSchedule:
         return PriceSchedule(
-                timestep_duration, 
-                max_rate, 
+                timestep_duration,  
                 min_rate, 
+                max_rate,
                 self.start_schedule, 
                 self.end_schedule
                 )
