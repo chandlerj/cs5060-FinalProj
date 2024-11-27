@@ -16,12 +16,12 @@ class NaiveDM(DecisionMaker):
 
     def __calc_charge_rates(self) -> None: 
         right_now = self.state.current_time
-        hours_remaining = (self.state.end_schedule - right_now).seconds // 3600
         for charger in self.state.chargers:
             for connector in charger.connectors:
                 if connector.connected_to != None:
                     bus = connector.connected_to
-                    soc_delta = bus.battery_capacity - bus.current_soc()
+                    hours_remaining = (bus.departure_time - right_now).seconds // 3600
+                    soc_delta = bus.battery_capacity - bus.desired_soc
                     charge_needed = abs(soc_delta - bus.desired_soc) 
                     # calculate lowest charge rate which will charge the bus by the desired end time
                     charge_rate = ((charge_needed * bus.battery_capacity) / hours_remaining) * 1000

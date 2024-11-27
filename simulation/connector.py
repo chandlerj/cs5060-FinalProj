@@ -56,7 +56,7 @@ class Connector:
         print the rate actually set
         """
         if not self.active():
-            print("Warning: Attempted to update the charge rate on an inactive connector", file=sys.stderr)
+            # print("Warning: Attempted to update the charge rate on an inactive connector", file=sys.stderr)
             return False
         if self.min_power_out <= rate and self.max_power_out >= rate:
             self.curr_power_delivery = rate
@@ -75,7 +75,7 @@ class Connector:
         """
         power_delivered = 0.0
         if not self.active():
-            print("Warning: Attempted to deliver power to inactive charger", file=sys.stderr)
+            # print("Warning: Attempted to deliver power to inactive charger", file=sys.stderr)
             return power_delivered
         # calculate power delivered per timestep
         power_per_timestep = (self.curr_power_delivery / 3600 ) * self.timestep_scale

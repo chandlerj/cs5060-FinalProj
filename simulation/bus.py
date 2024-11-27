@@ -1,16 +1,15 @@
 import numpy as np
 from datetime import datetime, timedelta
 import sys
-
 class Bus():
     
     def __init__(self, scheduledArrival: datetime, scheduledDeparture: datetime, battery_capacity: float, desired_soc: int):
         self.arrival_time:        datetime      = self.__getTrueArrivalTime(scheduledArrival)
         self.departure_time:      datetime      = self.__getTrueDepartureTime(scheduledDeparture)
-        self.battery_capacity:   float         = battery_capacity
-        self.__current_capacity: float         = self.__init_curr_capacity()
-        self.desired_soc:        int           = desired_soc
-        self.current_soc:        function      = lambda : int((self.__current_capacity / self.battery_capacity) * 100)
+        self.battery_capacity:    float         = battery_capacity
+        self.__current_capacity:  float         = self.__init_curr_capacity()
+        self.desired_soc:         int           = desired_soc
+        self.current_soc:         function      = lambda : int((self.__current_capacity / self.battery_capacity) * 100)
 
     
     def __init_curr_capacity(self, dist_center=150):
@@ -24,7 +23,7 @@ class Bus():
         arrival time. IE; expected arrival of 7:30PM but with noise
         alters arrival time to 7:34PM
         """
-        random_val = int(np.random.normal(0, 10, 1)[0])
+        random_val = abs(int(np.random.normal(0, 10, 1)[0]))
         arrival_offset = timedelta(minutes=random_val)
         true_arrival = scheduledArrival + arrival_offset
         return true_arrival
@@ -36,7 +35,7 @@ class Bus():
         departure time. IE; expected departure of 5:30AM but with noise
         alters departure time to 5:34AM
         """
-        random_val = int(np.random.normal(0, 10, 1)[0])
+        random_val = abs(int(np.random.normal(0, 10, 1)[0]))
         arrival_offset = timedelta(minutes=random_val)
         true_departure = scheduledDeparture + arrival_offset
         return true_departure

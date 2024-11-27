@@ -30,7 +30,7 @@ class SimState():
                                                                          min_power, 
                                                                          max_power,
                                                                          num_connectors)
-        self.busses:         List[Bus]      = self.__initialize_buses(num_buses, battery_capacity, desired_soc)
+        self.buses:         List[Bus]      = self.__initialize_buses(num_buses, battery_capacity, desired_soc)
 
 
     def __initialize_chargers(self, num_chargers: int, min_power: float, max_power: float, num_connectors: int)\
@@ -51,7 +51,7 @@ class SimState():
         for _ in range(0, num_buses):
             bus_list.append(Bus(
                 self.start_schedule, 
-                self.end_schedule, 
+                self.end_schedule - timedelta(hours=1), 
                 battery_capacity, 
                 desired_soc
                 )
@@ -76,7 +76,7 @@ class SimState():
         """
         print(sim_stats)
         print("BUS INFORMATION")
-        for bus in self.busses:
+        for bus in self.buses:
             bus.print_metrics()
         print("PRICING INFORMATION")
         self.price_schedule.print_metrics()
