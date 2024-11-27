@@ -56,9 +56,9 @@ class Connector:
         print the rate actually set
         """
         if not self.active():
-            # print("Warning: Attempted to update the charge rate on an inactive connector", file=sys.stderr)
+            print("Warning: Attempted to update the charge rate on an inactive connector", file=sys.stderr)
             return False
-        if self.min_power_out <= rate and self.max_power_out >= rate:
+        if self.min_power_out <= rate <= self.max_power_out:
             self.curr_power_delivery = rate
         elif self.min_power_out > rate:
             print(f"Warning: proposed charge rate ({rate}) is below minimum ({self.min_power_out}). setting charge rate to {self.min_power_out}", file=sys.stderr)
@@ -82,8 +82,8 @@ class Connector:
 
         for _ in range(timesteps):
             # add randomness to power delivery to emulate real charger behavior
-            random_val = np.random.normal(0, 0.33)
-            power_for_timestep = (power_per_timestep) + abs(random_val)
+            random_val = np.random.normal(0, 0.01)
+            power_for_timestep = (power_per_timestep) + random_val
             self.connected_to.charge(power_for_timestep)
             power_delivered += power_for_timestep
         return power_delivered

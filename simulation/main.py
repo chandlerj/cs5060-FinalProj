@@ -35,6 +35,9 @@ class Main:
             
             # update current time in simulation
             self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
+            # update rate of charge
+            self.d_maker.update_chargers(1)
+
             #print(f"Current time: {self.sim_state.current_time}")
             # check for buses arriving/departing
             for bus in self.sim_state.buses:
@@ -46,8 +49,6 @@ class Main:
                         if res:
                             print(f"{self.sim_state.current_time}: Bus disconnected\n{bus.print_metrics()}")
                             break
-            # update rate of charge
-            self.d_maker.update_chargers(1)
     
     def __check_bus_connected(self, bus):
         for charger in self.sim_state.chargers:
