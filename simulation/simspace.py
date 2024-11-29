@@ -30,7 +30,7 @@ class SimState():
                                                                          min_power, 
                                                                          max_power,
                                                                          num_connectors)
-        self.buses:         List[Bus]      = self.__initialize_buses(num_buses, battery_capacity, desired_soc)
+        self.buses:          List[Bus]      = self.__initialize_buses(num_buses, battery_capacity, desired_soc)
 
 
     def __initialize_chargers(self, num_chargers: int, min_power: float, max_power: float, num_connectors: int)\
