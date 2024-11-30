@@ -22,6 +22,10 @@ class SimState():
                  battery_capacity=588,
                  desired_soc=90
                  ) -> None:
+        self.min_power = min_power
+        self.max_power = max_power
+        self.num_chargers = num_chargers
+        self.num_connectors = num_connectors
         self.num_buses = num_buses
         self.battery_capacity = battery_capacity
         self.desired_soc = desired_soc
@@ -88,6 +92,8 @@ class SimState():
         for charger in self.chargers:
             charger.print_metrics()
 
+    # this stuff aids in training the RL model -------------------------------------------------------------------------------
+    
     def reset_simulation(self):
         """
         Reset the simulation state to its initial conditions.
@@ -95,7 +101,12 @@ class SimState():
         self.current_time = self.start_schedule
         self.total_price = 0
         self.is_done = False
+        self.chargers:       List[Charger]  = self.__initialize_chargers(self.num_chargers, 
+                                                                         self.min_power, 
+                                                                         self.max_power,
+                                                                         self.num_connectors)
         self.buses:          List[Bus]      = self.__initialize_buses(self.num_buses, self.battery_capacity, self.desired_soc)
+
 
     def apply_action(self, action):
         """
@@ -107,7 +118,22 @@ class SimState():
         """
         if len(action) != len(self.buses):
             raise ValueError("Action length must match the number of buses.")
-
+        
+        # check for buses arriving/departing
+        for bus in self.buses:
+            if bus.arrival_time == self.current_time:
+                        for charger in self.chargers:
+                            res = charger.connect_bus(bus)
+                            if res:
+                                print(f"{self.current_time}: Bus arrived and was connected")
+                                break
+            if bus.departure_time == self.current_time:
+                for charger in self.chargers:
+                    res = charger.disconnect_bus(bus)
+                    if res:
+                        print(f"{self.current_time}: Bus disconnected\n{bus.print_metrics()}")
+                        break
+        
         # Step 1: Apply the charging action
         for i, bus in enumerate(self.buses):
             # Find the charger and connector associated with the bus
@@ -115,8 +141,8 @@ class SimState():
                 for connector in charger.connectors:
                     if connector.connected_to == bus:
                         # Calculate the charging power based on action
-                        charge_rate = action[i] * charger.max_power
-                        charge_rate = max(0, min(charge_rate, charger.max_power))  # Clamp to valid range
+                        charge_rate = action[i] * self.max_power
+                        charge_rate = max(0, min(charge_rate, self.max_power))  # Clamp to valid range
                         connector.update_charge_rate(charge_rate)
 
         # Step 2: Advance the simulation state

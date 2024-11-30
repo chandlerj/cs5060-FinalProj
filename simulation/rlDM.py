@@ -44,7 +44,7 @@ class rlDM(DecisionMaker):
             for charger in self.state.chargers:
                 for connector in charger.connectors:
                     if connector.connected_to == bus:
-                        connector.update_charge_rate(action[i])
+                        connector.update_charge_rate(action[i] * self.state.max_power)
                         connector.deliver_power(timesteps)
 
     def print_metrics(self):
@@ -111,7 +111,7 @@ class BusDepotEnv(gym.Env):
             low=0, high=1, shape=(self.num_buses,), dtype=np.float32
         )
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(self.num_buses + 1,), dtype=np.float32
+            low=0, high=1, shape=(self.num_buses + 2,), dtype=np.float32
         )
 
     def reset(self):
@@ -121,12 +121,12 @@ class BusDepotEnv(gym.Env):
 
     def step(self, action):
         # Apply the action to the simulation
-        self.sim_state.apply_action(action) 
+        self.sim_state.apply_action(action*150) 
         
         # Get the next state, reward, and done flag
         observation = self.get_observation()
         reward = self.calculate_reward()
-        done = self.sim_state.is_done  # Define an appropriate termination condition
+        done = self.sim_state.is_done 
         info = {}  # Additional data if needed
         return observation, reward, done, info
 
@@ -138,13 +138,13 @@ class BusDepotEnv(gym.Env):
         # Example: Combine SOC and grid consumption as the observation
         socs = [bus.current_soc() for bus in self.sim_state.buses]
         grid_pull, energy_cost = self.sim_state.get_current_meterics()
-        return np.array(socs + [grid_pull], dtype=np.float32)
+        return np.array(socs + [grid_pull, energy_cost], dtype=np.float32)
 
     def calculate_reward(self):
         unmet_soc_penalty = sum(
             max(0, bus.desired_soc - bus.current_soc()) for bus in self.sim_state.buses
         )
-        grid_pull, energy_cost = self.sim_state.get_current_meterics()
+        _, energy_cost = self.sim_state.get_current_meterics()
         return unmet_soc_penalty - energy_cost
     
     def seed(self, seed=None):
