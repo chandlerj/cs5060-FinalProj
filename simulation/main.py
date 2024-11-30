@@ -34,8 +34,7 @@ class Main:
         total_timesteps = self.sim_state.price_schedule.num_timesteps
         timestep_scale = self.sim_state.price_schedule.timestep_duration
         for timestep in range(total_timesteps):
-            if timestep == total_timesteps - 1:
-                self.sim_state.is_done = True
+            
             # update current time in simulation
             self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
             # update rate of charge

@@ -37,7 +37,7 @@ class rlDM(DecisionMaker):
         # Get the current observation
         observation = self.env.envs[0].get_observation()  # Assuming single env
         action, _ = self.model.predict(observation, deterministic=True)
-
+        
         # Update chargers with the RL-decided rates
         rate_step = (self.state.current_time - self.state.start_schedule).seconds // 3600
         for i, bus in enumerate(self.state.buses):
@@ -128,7 +128,6 @@ class BusDepotEnv(gym.Env):
         reward = self.calculate_reward()
         done = self.sim_state.is_done  # Define an appropriate termination condition
         info = {}  # Additional data if needed
-        
         return observation, reward, done, info
 
     def render(self, mode='human'):
@@ -138,15 +137,15 @@ class BusDepotEnv(gym.Env):
     def get_observation(self):
         # Example: Combine SOC and grid consumption as the observation
         socs = [bus.current_soc() for bus in self.sim_state.buses]
-        grid_pull = self.sim_state.get_current_grid_pull()
+        grid_pull, energy_cost = self.sim_state.get_current_meterics()
         return np.array(socs + [grid_pull], dtype=np.float32)
 
     def calculate_reward(self):
         unmet_soc_penalty = sum(
             max(0, bus.desired_soc - bus.current_soc()) for bus in self.sim_state.buses
         )
-        energy_cost = self.sim_state.total_price
-        return -10 * unmet_soc_penalty - energy_cost
+        grid_pull, energy_cost = self.sim_state.get_current_meterics()
+        return unmet_soc_penalty - energy_cost
     
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)

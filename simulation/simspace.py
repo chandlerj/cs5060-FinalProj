@@ -26,7 +26,6 @@ class SimState():
         self.battery_capacity = battery_capacity
         self.desired_soc = desired_soc
         self.is_done = False
-        self.total_price = 0
         self.start_schedule: datetime       = start_schedule
         self.end_schedule:   datetime       = end_schedule
         self.current_time:   datetime       = self.start_schedule
@@ -95,6 +94,7 @@ class SimState():
         """
         self.current_time = self.start_schedule
         self.total_price = 0
+        self.is_done = False
         self.buses:          List[Bus]      = self.__initialize_buses(self.num_buses, self.battery_capacity, self.desired_soc)
 
     def apply_action(self, action):
@@ -108,6 +108,7 @@ class SimState():
         if len(action) != len(self.buses):
             raise ValueError("Action length must match the number of buses.")
 
+        # Step 1: Apply the charging action
         for i, bus in enumerate(self.buses):
             # Find the charger and connector associated with the bus
             for charger in self.chargers:
@@ -118,12 +119,25 @@ class SimState():
                         charge_rate = max(0, min(charge_rate, charger.max_power))  # Clamp to valid range
                         connector.update_charge_rate(charge_rate)
 
-    def get_current_grid_pull(self):
-       grid_pull = np.sum([charger.current_draw for charger in self.chargers])
-       # update the total charging cost
-       self.total_price += grid_pull * self.price_schedule.get_current_price(self.current_time)
-       return grid_pull
+        # Step 2: Advance the simulation state
+        timestep_duration = self.price_schedule.timestep_duration  # Time step in hours
+        for charger in self.chargers:
+            for connector in charger.connectors:
+                connector.deliver_power(timestep_duration)  # Update bus SOCs based on charging rates
 
+        # Update the simulation time
+        self.current_time += timedelta(hours=timestep_duration)
+        if self.current_time == self.end_schedule:
+            self.is_done = True
+       
+
+
+    def get_current_meterics(self):
+       grid_pull = np.sum([charger.current_draw for charger in self.chargers])
+       cost = grid_pull * self.price_schedule.get_current_price(self.current_time)
+       return grid_pull, cost
+
+    
 
 
 if __name__ == "__main__":
