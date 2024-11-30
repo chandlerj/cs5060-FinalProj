@@ -119,21 +119,6 @@ class SimState():
         if len(action) != len(self.buses):
             raise ValueError("Action length must match the number of buses.")
         
-        # check for buses arriving/departing
-        for bus in self.buses:
-            if bus.arrival_time == self.current_time:
-                        for charger in self.chargers:
-                            res = charger.connect_bus(bus)
-                            if res:
-                                print(f"{self.current_time}: Bus arrived and was connected")
-                                break
-            if bus.departure_time == self.current_time:
-                for charger in self.chargers:
-                    res = charger.disconnect_bus(bus)
-                    if res:
-                        print(f"{self.current_time}: Bus disconnected\n{bus.print_metrics()}")
-                        break
-        
         # Step 1: Apply the charging action
         for i, bus in enumerate(self.buses):
             # Find the charger and connector associated with the bus
@@ -145,18 +130,32 @@ class SimState():
                         charge_rate = max(0, min(charge_rate, self.max_power))  # Clamp to valid range
                         connector.update_charge_rate(charge_rate)
 
-        # Step 2: Advance the simulation state
-        timestep_duration = self.price_schedule.timestep_duration  # Time step in hours
-        for charger in self.chargers:
-            for connector in charger.connectors:
-                connector.deliver_power(timestep_duration)  # Update bus SOCs based on charging rates
+        for i in range(3600):
+            # Step 2: Advance the simulation state
+            timestep_duration = self.price_schedule.timestep_duration
+            for charger in self.chargers:
+                for connector in charger.connectors:
+                    connector.deliver_power(timestep_duration)  # Update bus SOCs based on charging rates
 
-        # Update the simulation time
-        self.current_time += timedelta(seconds=timestep_duration)
-        if self.current_time == self.end_schedule:
-            self.is_done = True
-       
+            # Update the simulation time
+            self.current_time += timedelta(seconds=timestep_duration)
+            if self.current_time == self.end_schedule:
+                self.is_done = True
 
+            # check for buses arriving/departing
+            for bus in self.buses:
+                if bus.arrival_time == self.current_time:
+                    for charger in self.chargers:
+                        res = charger.connect_bus(bus)
+                        if res:
+                            print(f"{self.current_time}: Bus arrived and was connected")
+                            break
+                if bus.departure_time == self.current_time:
+                    for charger in self.chargers:
+                        res = charger.disconnect_bus(bus)
+                        if res:
+                            print(f"{self.current_time}: Bus disconnected\n{bus.print_metrics()}")
+                            break
 
     def get_current_meterics(self):
        grid_pull = np.sum([charger.current_draw for charger in self.chargers])

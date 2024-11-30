@@ -26,7 +26,7 @@ class rlDM(DecisionMaker):
         # Initialize and train PPO
         self.model = PPO("MlpPolicy", self.env, verbose=1)
         print("training RL model...")
-        self.model.learn(total_timesteps=10000)
+        self.model.learn(total_timesteps=100)
         print("model is ready for prediction")
 
     def update_chargers(self, timesteps) -> None:
