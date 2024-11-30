@@ -14,3 +14,6 @@ class DecisionMaker:
         timesteps - number of timesteps to run simulation
         """
         pass
+
+    def print_metrics(self):
+        pass

@@ -13,14 +13,14 @@ class SimState():
                  end_schedule, 
                  num_chargers=5,
                  num_connectors=2,
-                 num_buses=6,
+                 num_buses=10,
                  min_power=0,
                  max_power=1000,
                  timestep_duration=1,
                  max_rate=0.24,
                  min_rate=0.08,
                  battery_capacity=588,
-                 desired_soc=90
+                 desired_soc=100
                  ) -> None:
         self.min_power = min_power
         self.max_power = max_power

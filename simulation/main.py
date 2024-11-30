@@ -11,13 +11,13 @@ from rlDM import rlDM
 class Main:
 
     def __init__(self, d_maker: str, num_chargers: int, num_buses: int):
-        self.sim_state: SimState      = self.__make_sim_state()
+        self.sim_state: SimState      = self.__make_sim_state(num_chargers=num_chargers, num_buses=num_buses)
         self.d_maker:   DecisionMaker = self.__make_decision_maker(d_maker, self.sim_state)
 
-    def __make_sim_state(self) -> SimState:
+    def __make_sim_state(self, num_chargers, num_buses) -> SimState:
         start_time = datetime.fromisoformat('2024-12-06T19:00:00')
         end_time = datetime.fromisoformat('2024-12-07T06:00:00')
-        return SimState(start_time, end_time)    
+        return SimState(start_time, end_time, num_chargers=num_chargers, num_buses=num_buses)    
 
     def __make_decision_maker(self, d_maker: str, sim_state: SimState):
         if d_maker.lower() == "naive":
@@ -74,8 +74,11 @@ if __name__ == "__main__":
 #                   decision maker  number of chargers  number of busses 
         main = Main(sys.argv[1],    int(sys.argv[2]),   int(sys.argv[3]))
     else:
-        main = Main("rule-based", 5, 4)
+        main = Main("rule-based", 8, 16)
         print("DECISON MAKER METRICS")
         main.d_maker.print_metrics()
         main.sim_state.print_metrics()
     main.run_sim()
+    if type(main.d_maker) == rtsoDM:
+        main.d_maker.plot_bus_charge_rates()
+        main.d_maker.plot_total_charge_rate()

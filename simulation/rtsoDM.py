@@ -2,6 +2,7 @@ from decisionMaker import DecisionMaker
 from datetime import timedelta
 import pygad
 import numpy as np
+import matplotlib.pyplot as plt
 
 class rtsoDM(DecisionMaker):
 
@@ -10,25 +11,29 @@ class rtsoDM(DecisionMaker):
         self.num_buses          = len(self.state.buses)
         self.num_time_slots     = self.__get_num_time_slots()
         self.energy_demands     = self.__get_energy_demands()
-        self.grid_limit         = 300 # TODO: arbitrary value, test best input
+        self.grid_limit         = 1000 # TODO: arbitrary value, test best input
         self.time_slot_duration = 1   # TODO: another arbitrary value, currently assumes time slots are hours
         self.electricity_prices = self.state.price_schedule.price_schedule
         self.arrival_times, self.departure_times    = self.__get_bus_times()
         self.charge_rate        = self.__get_charge_rates(self.__create_gene_space())
+
 
     def update_chargers(self, timesteps) -> None:
         """
         update connector with charge rate and then
         deliver power to bus over timesteps
         """
-        rate_step = (self.state.current_time - self.state.start_schedule).seconds // 3600
-        for i, bus in enumerate(self.state.buses):
-            # find connector with bus
-            for charger in self.state.chargers:
-                for connector in charger.connectors:
-                    if connector.connected_to == bus:
-                        connector.update_charge_rate(self.charge_rate[i, rate_step])
-                        connector.deliver_power(timesteps)
+        for _ in range(timesteps):
+            rate_step = (self.state.current_time - self.state.start_schedule).seconds // 3600
+            for i, bus in enumerate(self.state.buses):
+                # find connector with bus
+                for charger in self.state.chargers:
+                    for connector in charger.connectors:
+                        if connector.connected_to == bus:
+                            connector.update_charge_rate(self.charge_rate[i, rate_step])
+                            connector.deliver_power(timesteps)
+
+
     def print_metrics(self):
         metrics = f"""
         number of buses: {self.num_buses}
@@ -39,7 +44,7 @@ class rtsoDM(DecisionMaker):
         electricity prices: {self.electricity_prices}
         bus arrival times: {self.arrival_times}
         bus departure times: {self.departure_times}
-        charge rates for each bus:\n {self.charge_rate}
+        charge rates for each bus:\n{self.charge_rate}
         """
         print(metrics)
 
@@ -73,6 +78,7 @@ class rtsoDM(DecisionMaker):
             energy_demands.append(bus.battery_capacity * (bus.desired_soc - bus.current_soc()))
 
         return energy_demands
+
 
     @staticmethod
     def __fitness_function(
@@ -120,6 +126,7 @@ class rtsoDM(DecisionMaker):
     
         return -1 * (total_cost + penalty)  # Minimize cost with penalties
 
+
     def __create_gene_space(self):
         """
         set charge rate to 0 if bus will not be at charge
@@ -138,6 +145,7 @@ class rtsoDM(DecisionMaker):
             gene_space.extend(bus_gene_space)
         return gene_space
 
+
     def __get_charge_rates(self, gene_space):
         num_genes = self.num_buses * self.num_time_slots
 
@@ -155,12 +163,33 @@ class rtsoDM(DecisionMaker):
             parent_selection_type="rank",
             crossover_type="single_point",
             mutation_type="random",
-            mutation_percent_genes=2
+            mutation_percent_genes=8
         )
 
         ga_instance.run()
         solution, solution_fitness, solution_idx = ga_instance.best_solution()
         charging_schedule = solution.reshape(self.num_buses, self.num_time_slots)
+
         return charging_schedule
 
+
+    def plot_bus_charge_rates(self):
+        for i, row in enumerate(self.charge_rate):
+            plt.plot(row, label=f"bus {i}")
+        plt.xlabel("hour of charge session")
+        plt.ylabel("power to deliver (kWh)")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
+    def plot_total_charge_rate(self):
+        totals = [0 for _ in self.charge_rate[0]]
+        for charge_rate in self.charge_rate:
+            for i, element in enumerate(charge_rate):
+                totals[i] += element
+        plt.plot(totals)
+        plt.xlabel("hour of charge session")
+        plt.ylabel("total power delivered (kWh)")
+        plt.grid(True)
+        plt.show()
 
