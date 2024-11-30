@@ -152,7 +152,7 @@ class SimState():
                 connector.deliver_power(timestep_duration)  # Update bus SOCs based on charging rates
 
         # Update the simulation time
-        self.current_time += timedelta(hours=timestep_duration)
+        self.current_time += timedelta(seconds=timestep_duration)
         if self.current_time == self.end_schedule:
             self.is_done = True
        
