@@ -6,6 +6,7 @@ from decisionMaker import DecisionMaker
 
 from naiveDM import NaiveDM
 from rtsoDM import rtsoDM
+from rlDM import rlDM
 
 class Main:
 
@@ -25,7 +26,7 @@ class Main:
         elif d_maker.lower() == "rule-based":
             return rtsoDM(sim_state)
         elif d_maker.lower() == "rl":
-            return DecisionMaker(sim_state)
+            return rlDM(sim_state)
         else:
             raise NotImplementedError(f"Decision maker ${d_maker} is not a valid decision maker")
             
@@ -33,7 +34,8 @@ class Main:
         total_timesteps = self.sim_state.price_schedule.num_timesteps
         timestep_scale = self.sim_state.price_schedule.timestep_duration
         for timestep in range(total_timesteps):
-            
+            if timestep == total_timesteps - 1:
+                self.sim_state.is_done = True
             # update current time in simulation
             self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
             # update rate of charge
@@ -50,6 +52,7 @@ class Main:
                         if res:
                             print(f"{self.sim_state.current_time}: Bus disconnected\n{bus.print_metrics()}")
                             break
+        
     
     def __check_bus_connected(self, bus):
         for charger in self.sim_state.chargers:
