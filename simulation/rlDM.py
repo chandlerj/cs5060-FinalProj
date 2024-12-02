@@ -26,8 +26,10 @@ class rlDM(DecisionMaker):
         # Initialize and train PPO
         self.model = PPO("MlpPolicy", self.env, verbose=1)
         print("training RL model...")
+        self.state.print_metrics()
         self.model.learn(total_timesteps=100)
         print("model is ready for prediction")
+        self.state.reset_simulation()
 
     def update_chargers(self, timesteps) -> None:
         """
@@ -38,14 +40,7 @@ class rlDM(DecisionMaker):
         observation = self.env.envs[0].get_observation()  # Assuming single env
         action, _ = self.model.predict(observation, deterministic=True)
         
-        # Update chargers with the RL-decided rates
-        rate_step = (self.state.current_time - self.state.start_schedule).seconds // 3600
-        for i, bus in enumerate(self.state.buses):
-            for charger in self.state.chargers:
-                for connector in charger.connectors:
-                    if connector.connected_to == bus:
-                        connector.update_charge_rate(action[i] * self.state.max_power)
-                        connector.deliver_power(timesteps)
+        self.state.apply_action(action, verbose=True)
 
     def print_metrics(self):
         metrics = f"""
@@ -121,7 +116,7 @@ class BusDepotEnv(gym.Env):
 
     def step(self, action):
         # Apply the action to the simulation
-        self.sim_state.apply_action(action*150) 
+        self.sim_state.apply_action(action) 
         
         # Get the next state, reward, and done flag
         observation = self.get_observation()
@@ -137,15 +132,16 @@ class BusDepotEnv(gym.Env):
     def get_observation(self):
         # Example: Combine SOC and grid consumption as the observation
         socs = [bus.current_soc() for bus in self.sim_state.buses]
-        grid_pull, energy_cost = self.sim_state.get_current_meterics()
-        return np.array(socs + [grid_pull, energy_cost], dtype=np.float32)
+        grid_pull, energy_price = self.sim_state.get_current_meterics()
+        return np.array(socs + [grid_pull, energy_price], dtype=np.float32) # add time to departure
 
     def calculate_reward(self):
         unmet_soc_penalty = sum(
             max(0, bus.desired_soc - bus.current_soc()) for bus in self.sim_state.buses
         )
-        _, energy_cost = self.sim_state.get_current_meterics()
-        return unmet_soc_penalty - energy_cost
+        grid_pull, energy_price = self.sim_state.get_current_meterics()
+        energy_cost = grid_pull * energy_price
+        return -10 * unmet_soc_penalty - energy_cost # reward for being close to the naive approach
     
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)

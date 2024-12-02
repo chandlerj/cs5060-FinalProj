@@ -33,26 +33,30 @@ class Main:
     def run_sim(self):
         total_timesteps = self.sim_state.price_schedule.num_timesteps
         timestep_scale = self.sim_state.price_schedule.timestep_duration
-        for timestep in range(total_timesteps):
-            
-            # update current time in simulation
-            self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
-            # update rate of charge
-            self.d_maker.update_chargers(1)
+        if type(self.d_maker) == rlDM:
+            for timestep in range(total_timesteps//3600):
+                self.d_maker.update_chargers(1)
+        else:
+            for timestep in range(total_timesteps):
+                
+                # update current time in simulation
+                self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
+                # update rate of charge
+                self.d_maker.update_chargers(1)
 
-            #print(f"Current time: {self.sim_state.current_time}")
-            # check for buses arriving/departing
-            for bus in self.sim_state.buses:
-                if bus.arrival_time == self.sim_state.current_time:
-                            self.__find_open_connector(bus)
-                if bus.departure_time == self.sim_state.current_time:
-                    for charger in self.sim_state.chargers:
-                        res = charger.disconnect_bus(bus)
-                        if res:
-                            print(f"{self.sim_state.current_time}: Bus disconnected\n{bus.print_metrics()}")
-                            break
+                #print(f"Current time: {self.sim_state.current_time}")
+                # check for buses arriving/departing
+                for bus in self.sim_state.buses:
+                    if bus.arrival_time == self.sim_state.current_time:
+                                self.__find_open_connector(bus)
+                    if bus.departure_time == self.sim_state.current_time:
+                        for charger in self.sim_state.chargers:
+                            res = charger.disconnect_bus(bus)
+                            if res:
+                                print(f"{self.sim_state.current_time}: Bus disconnected\n{bus.print_metrics()}")
+                                break
+            
         
-    
     def __check_bus_connected(self, bus):
         for charger in self.sim_state.chargers:
             for connector in charger.connectors:

@@ -15,12 +15,12 @@ class SimState():
                  num_connectors=2,
                  num_buses=10,
                  min_power=0,
-                 max_power=1000,
+                 max_power=100,
                  timestep_duration=1,
                  max_rate=0.24,
                  min_rate=0.08,
                  battery_capacity=588,
-                 desired_soc=100
+                 desired_soc=90
                  ) -> None:
         self.min_power = min_power
         self.max_power = max_power
@@ -99,16 +99,16 @@ class SimState():
         Reset the simulation state to its initial conditions.
         """
         self.current_time = self.start_schedule
-        self.total_price = 0
         self.is_done = False
         self.chargers:       List[Charger]  = self.__initialize_chargers(self.num_chargers, 
                                                                          self.min_power, 
                                                                          self.max_power,
                                                                          self.num_connectors)
         self.buses:          List[Bus]      = self.__initialize_buses(self.num_buses, self.battery_capacity, self.desired_soc)
+        print("resetting...")
 
 
-    def apply_action(self, action):
+    def apply_action(self, action, verbose=False):
         """
         Apply the action to the simulation state by updating charger outputs
         and advancing the simulation by one timestep.
@@ -128,7 +128,7 @@ class SimState():
                         # Calculate the charging power based on action
                         charge_rate = action[i] * self.max_power
                         charge_rate = max(0, min(charge_rate, self.max_power))  # Clamp to valid range
-                        connector.update_charge_rate(charge_rate)
+                        charger.update_charge_rate(connector.connector_id, charge_rate)
 
         for i in range(3600):
             # Step 2: Advance the simulation state
@@ -148,19 +148,21 @@ class SimState():
                     for charger in self.chargers:
                         res = charger.connect_bus(bus)
                         if res:
-                            print(f"{self.current_time}: Bus arrived and was connected")
+                            if verbose:
+                                print(f"{self.current_time}: Bus arrived and was connected")
                             break
                 if bus.departure_time == self.current_time:
                     for charger in self.chargers:
                         res = charger.disconnect_bus(bus)
                         if res:
-                            print(f"{self.current_time}: Bus disconnected\n{bus.print_metrics()}")
+                            if verbose:
+                                print(f"{self.current_time}: Bus disconnected\n{bus.print_metrics()}")
                             break
 
     def get_current_meterics(self):
        grid_pull = np.sum([charger.current_draw for charger in self.chargers])
-       cost = grid_pull * self.price_schedule.get_current_price(self.current_time)
-       return grid_pull, cost
+       price = self.price_schedule.get_current_price(self.current_time)
+       return grid_pull, price
 
     
 
