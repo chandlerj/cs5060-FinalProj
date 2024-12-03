@@ -15,6 +15,9 @@ class Bus():
     def __init_curr_capacity(self, dist_center=150):
         random_val = np.random.normal(dist_center, 10 , 1)[0]
         return random_val
+    
+    def get_current_capacity(self):
+        return self.__current_capacity
 
 
     def __getTrueArrivalTime(self, scheduledArrival):
