@@ -85,7 +85,7 @@ class Main:
                 for i, soc in enumerate(self.soc_data):
                     axs[0].plot(self.time_points, soc, label=f"Bus {i}")
                 axs[0].set_title("State of Charge (SOC) Over Time")
-                axs[0].set_xlabel("Time (hours)")
+                axs[0].set_xlabel("Time")
                 axs[0].set_ylabel("SOC (%)")
                 axs[0].legend()
 
@@ -93,8 +93,8 @@ class Main:
                 for i, charge_rate in enumerate(self.charge_rate_data):
                     axs[1].plot(self.time_points, charge_rate, label=f"Bus {i}")
                 axs[1].set_title("Charge Rate Over Time")
-                axs[1].set_xlabel("Time (hours)")
-                axs[1].set_ylabel("Charge Rate (kW)")
+                axs[1].set_xlabel("Time")
+                axs[1].set_ylabel("Charge Rate")
                 axs[1].legend()
 
                 plt.tight_layout()
