@@ -56,8 +56,9 @@ class SimState():
 
     def __initialize_buses(self, num_buses, battery_capacity, desired_soc) -> list[Bus]:
         bus_list = []
-        for _ in range(0, num_buses):
+        for i in range(0, num_buses):
             bus_list.append(Bus(
+                i,
                 self.start_schedule, 
                 self.end_schedule - timedelta(hours=1), 
                 battery_capacity, 

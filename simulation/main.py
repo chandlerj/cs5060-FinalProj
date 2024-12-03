@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from simspace import SimState
 from datetime import datetime, timedelta
 
@@ -13,6 +15,10 @@ class Main:
     def __init__(self, d_maker: str, num_chargers: int, num_buses: int):
         self.sim_state: SimState      = self.__make_sim_state(num_chargers=num_chargers, num_buses=num_buses)
         self.d_maker:   DecisionMaker = self.__make_decision_maker(d_maker, self.sim_state)
+        self.num_buses = num_buses
+        self.time_points = []
+        self.soc_data = [[] for _ in range(num_buses)]
+        self.charge_rate_data = [[] for _ in range(num_buses)]
 
     def __make_sim_state(self, num_chargers, num_buses) -> SimState:
         start_time = datetime.fromisoformat('2024-12-06T19:00:00')
@@ -35,10 +41,21 @@ class Main:
         timestep_scale = self.sim_state.price_schedule.timestep_duration
         if type(self.d_maker) == rlDM:
             for timestep in range(total_timesteps//3600):
+
+                # update plot data for state of charge
+                self.time_points.append(timestep)
+                for bus in self.sim_state.buses:
+                    self.soc_data[timestep].append(bus.current_soc)
+
                 self.d_maker.update_chargers(1)
         else:
             for timestep in range(total_timesteps):
-                
+
+                # update plot data for state of charge
+                self.time_points.append(timestep)
+                for bus in self.sim_state.buses:
+                    self.soc_data[timestep].append(bus.current_soc)
+
                 # update current time in simulation
                 self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
                 # update rate of charge
@@ -55,6 +72,33 @@ class Main:
                             if res:
                                 print(f"{self.sim_state.current_time}: Bus disconnected\n{bus.print_metrics()}")
                                 break
+
+                # create charge rate array to plot
+                for bus in range(self.num_buses):
+                    for t in range(1, len(self.soc_data[bus])):
+                        self.charge_rate_data[bus].append((self.soc_data[bus][t] - self.soc_data[bus][t - 1]))
+
+                # Plot results
+                fig, axs = plt.subplots(2, 1, figsize=(12, 8))
+
+                # Plot SOC over time
+                for i, soc in enumerate(self.soc_data):
+                    axs[0].plot(self.time_points, soc, label=f"Bus {i}")
+                axs[0].set_title("State of Charge (SOC) Over Time")
+                axs[0].set_xlabel("Time")
+                axs[0].set_ylabel("SOC (%)")
+                axs[0].legend()
+
+                # Plot Charge Rates over time
+                for i, charge_rate in enumerate(self.charge_rate_data):
+                    axs[1].plot(self.time_points, charge_rate, label=f"Bus {i}")
+                axs[1].set_title("Charge Rate Over Time")
+                axs[1].set_xlabel("Time")
+                axs[1].set_ylabel("Charge Rate")
+                axs[1].legend()
+
+                plt.tight_layout()
+                plt.show()
             
         
     def __check_bus_connected(self, bus):

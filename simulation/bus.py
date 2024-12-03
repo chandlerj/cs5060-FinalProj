@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 import sys
 class Bus():
     
-    def __init__(self, scheduledArrival: datetime, scheduledDeparture: datetime, battery_capacity: float, desired_soc: int):
+    def __init__(self, bus_id, scheduledArrival: datetime, scheduledDeparture: datetime, battery_capacity: float, desired_soc: int):
         self.arrival_time:        datetime      = self.__getTrueArrivalTime(scheduledArrival)
+        self.id:                  int           = bus_id
         self.departure_time:      datetime      = self.__getTrueDepartureTime(scheduledDeparture)
         self.battery_capacity:    float         = battery_capacity
         self.__current_capacity:  float         = self.__init_curr_capacity()

@@ -101,7 +101,9 @@ class Connector:
 if __name__ == "__main__":
     start_time = datetime.now()
     end_time = datetime.now() + timedelta(hours=8)
-    test_bus = Bus(start_time, 
+    test_bus= Bus(
+                    0,
+            start_time, 
                    end_time, 
                      538, 
                           95)
