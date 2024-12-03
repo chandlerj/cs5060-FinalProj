@@ -27,7 +27,7 @@ class rlDM(DecisionMaker):
         self.model = PPO("MlpPolicy", self.env, verbose=1)
         print("training RL model...")
         self.state.print_metrics()
-        self.model.learn(total_timesteps=100)
+        self.model.learn(total_timesteps=10)
         print("model is ready for prediction")
         self.state.reset_simulation()
 
@@ -106,7 +106,7 @@ class BusDepotEnv(gym.Env):
             low=0, high=1, shape=(self.num_buses,), dtype=np.float32
         )
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(self.num_buses + 2,), dtype=np.float32
+            low=0, high=1, shape=(self.num_buses * 2 + 2,), dtype=np.float32
         )
 
     def reset(self):
@@ -132,16 +132,26 @@ class BusDepotEnv(gym.Env):
     def get_observation(self):
         # Example: Combine SOC and grid consumption as the observation
         socs = [bus.current_soc() for bus in self.sim_state.buses]
+        departures = [int((bus.departure_time - self.sim_state.current_time).total_seconds() // 60) for bus in self.sim_state.buses]
         grid_pull, energy_price = self.sim_state.get_current_meterics()
-        return np.array(socs + [grid_pull, energy_price], dtype=np.float32) # add time to departure
+        return np.array(socs + departures + [grid_pull, energy_price], dtype=np.float32)
 
     def calculate_reward(self):
         unmet_soc_penalty = sum(
             max(0, bus.desired_soc - bus.current_soc()) for bus in self.sim_state.buses
         )
+        ideal_grid_pull = 0
+        for bus in self.sim_state.buses:
+            time_to_departure = max(0, int((bus.departure_time - self.sim_state.current_time).total_seconds() // 3600)) 
+            capacity = bus.battery_capacity
+            current_charge = bus.get_current_capacity()
+            if time_to_departure != 0:
+                ideal_grid_pull += (capacity - current_charge) // time_to_departure
+
         grid_pull, energy_price = self.sim_state.get_current_meterics()
+        rate_penalty = np.abs(ideal_grid_pull - grid_pull)
         energy_cost = grid_pull * energy_price
-        return -10 * unmet_soc_penalty - energy_cost # reward for being close to the naive approach
+        return unmet_soc_penalty - (energy_cost / 10) - rate_penalty # reward for being close to the naive approach
     
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)

@@ -44,8 +44,8 @@ class Main:
 
                 # update plot data for state of charge
                 self.time_points.append(timestep)
-                for bus in self.sim_state.buses:
-                    self.soc_data[timestep].append(bus.current_soc)
+                for i, bus in enumerate(self.sim_state.buses):
+                    self.soc_data[i].append(bus.current_soc())
 
                 self.d_maker.update_chargers(1)
         else:
@@ -53,8 +53,8 @@ class Main:
 
                 # update plot data for state of charge
                 self.time_points.append(timestep)
-                for bus in self.sim_state.buses:
-                    self.soc_data[timestep].append(bus.current_soc)
+                for i, bus in enumerate(self.sim_state.buses):
+                    self.soc_data[i].append(bus.current_soc())
 
                 # update current time in simulation
                 self.sim_state.current_time = self.sim_state.current_time + timedelta(seconds=timestep_scale)
@@ -73,32 +73,22 @@ class Main:
                                 print(f"{self.sim_state.current_time}: Bus disconnected\n{bus.print_metrics()}")
                                 break
 
-                # create charge rate array to plot
-                for bus in range(self.num_buses):
-                    for t in range(1, len(self.soc_data[bus])):
-                        self.charge_rate_data[bus].append((self.soc_data[bus][t] - self.soc_data[bus][t - 1]))
 
-                # Plot results
-                fig, axs = plt.subplots(2, 1, figsize=(12, 8))
+        # Plotting
+        plt.figure(figsize=(10, 6))
 
-                # Plot SOC over time
-                for i, soc in enumerate(self.soc_data):
-                    axs[0].plot(self.time_points, soc, label=f"Bus {i}")
-                axs[0].set_title("State of Charge (SOC) Over Time")
-                axs[0].set_xlabel("Time")
-                axs[0].set_ylabel("SOC (%)")
-                axs[0].legend()
+        for i, soc in enumerate(self.soc_data):
+            plt.plot(self.time_points, soc, label=f'Bus {i+1}')  # Plot SOC for each bus
 
-                # Plot Charge Rates over time
-                for i, charge_rate in enumerate(self.charge_rate_data):
-                    axs[1].plot(self.time_points, charge_rate, label=f"Bus {i}")
-                axs[1].set_title("Charge Rate Over Time")
-                axs[1].set_xlabel("Time")
-                axs[1].set_ylabel("Charge Rate")
-                axs[1].legend()
+        # Add labels, legend, and grid
+        plt.xlabel('Timestep')
+        plt.ylabel('State of Charge (SOC)')
+        plt.title('SOC vs Time for Each Bus')
+        plt.legend()
+        plt.grid(True)
 
-                plt.tight_layout()
-                plt.show()
+        # Display the plot
+        plt.show()
             
         
     def __check_bus_connected(self, bus):

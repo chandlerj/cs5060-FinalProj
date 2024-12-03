@@ -151,13 +151,15 @@ class SimState():
                         if res:
                             if verbose:
                                 print(f"{self.current_time}: Bus arrived and was connected")
+                                bus.print_metrics()
                             break
                 if bus.departure_time == self.current_time:
                     for charger in self.chargers:
                         res = charger.disconnect_bus(bus)
                         if res:
                             if verbose:
-                                print(f"{self.current_time}: Bus disconnected\n{bus.print_metrics()}")
+                                print(f"{self.current_time}: Bus disconnected")
+                                bus.print_metrics()
                             break
 
     def get_current_meterics(self):
