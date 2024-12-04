@@ -95,7 +95,7 @@ class SimState():
 
     # this stuff aids in training the RL model -------------------------------------------------------------------------------
     
-    def reset_simulation(self):
+    def reset_simulation(self, verbose=False):
         """
         Reset the simulation state to its initial conditions.
         """
@@ -106,7 +106,7 @@ class SimState():
                                                                          self.max_power,
                                                                          self.num_connectors)
         self.buses:          List[Bus]      = self.__initialize_buses(self.num_buses, self.battery_capacity, self.desired_soc)
-        print("resetting...")
+       
 
 
     def apply_action(self, action, verbose=False):
@@ -147,7 +147,7 @@ class SimState():
             for bus in self.buses:
                 if bus.arrival_time == self.current_time:
                     for charger in self.chargers:
-                        res = charger.connect_bus(bus)
+                        res = charger.connect_bus(bus, verbose=False)
                         if res:
                             if verbose:
                                 print(f"{self.current_time}: Bus arrived and was connected")
@@ -155,7 +155,7 @@ class SimState():
                             break
                 if bus.departure_time == self.current_time:
                     for charger in self.chargers:
-                        res = charger.disconnect_bus(bus)
+                        res = charger.disconnect_bus(bus, verbose=False)
                         if res:
                             if verbose:
                                 print(f"{self.current_time}: Bus disconnected")

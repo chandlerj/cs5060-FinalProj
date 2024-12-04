@@ -18,7 +18,7 @@ class Charger:
         self.meter_count: int             = 0
         self.current_draw:float           = 0.0
 
-    def connect_bus(self, bus: Bus) -> bool:
+    def connect_bus(self, bus: Bus, verbose=True) -> bool:
         """
         Connect bus to available connector.
         If no connectors are available, return False
@@ -32,10 +32,11 @@ class Charger:
                 return True
 
         # no connectors are available
-        print("error: This charger has no available connectors", file=sys.stderr)
+        if verbose:
+            print("error: This charger has no available connectors", file=sys.stderr)
         return False
     
-    def disconnect_bus(self, bus: Bus) -> bool:
+    def disconnect_bus(self, bus: Bus, verbose=True) -> bool:
         """
         Disconnect bus from connector
         return False if bus is not on any connectors
@@ -49,7 +50,8 @@ class Charger:
                 continue
 
         # Bus not on any connectors
-        print("error: Bus could not be found on any connectors", file=sys.stderr)
+        if verbose:
+            print("error: Bus could not be found on any connectors", file=sys.stderr)
         return False
 
     def update_charge_rate(self, connector_id: int, rate: float) -> bool:

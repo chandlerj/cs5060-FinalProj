@@ -27,7 +27,7 @@ class rlDM(DecisionMaker):
         self.model = PPO("MlpPolicy", self.env, verbose=1)
         print("training RL model...")
         self.state.print_metrics()
-        self.model.learn(total_timesteps=10)
+        self.model.learn(total_timesteps=10000)
         print("model is ready for prediction")
         self.state.reset_simulation()
 
@@ -151,7 +151,7 @@ class BusDepotEnv(gym.Env):
         grid_pull, energy_price = self.sim_state.get_current_meterics()
         rate_penalty = np.abs(ideal_grid_pull - grid_pull)
         energy_cost = grid_pull * energy_price
-        return unmet_soc_penalty - (energy_cost / 10) - rate_penalty # reward for being close to the naive approach
+        return - unmet_soc_penalty - (energy_cost / 10) - rate_penalty # reward for being close to the naive approach
     
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)
