@@ -47,7 +47,7 @@ class Main:
                 for i, bus in enumerate(self.sim_state.buses):
                     self.soc_data[i].append(bus.current_soc())
 
-                self.d_maker.update_chargers(1)
+                self.d_maker.update_chargers(timestep)
         else:
             for timestep in range(total_timesteps):
 
@@ -117,6 +117,6 @@ if __name__ == "__main__":
         main.d_maker.print_metrics()
         main.sim_state.print_metrics()
     main.run_sim()
-    if type(main.d_maker) == rtsoDM:
+    if type(main.d_maker) == rtsoDM or type(main.d_maker) == rlDM:
         main.d_maker.plot_bus_charge_rates()
         main.d_maker.plot_total_charge_rate()

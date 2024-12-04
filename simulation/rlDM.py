@@ -5,6 +5,7 @@ from gym import spaces
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 import numpy as np
+import matplotlib.pyplot as plt
 
 class rlDM(DecisionMaker):
 
@@ -31,7 +32,27 @@ class rlDM(DecisionMaker):
         print("model is ready for prediction")
         self.state.reset_simulation()
 
-    def update_chargers(self, timesteps) -> None:
+    def plot_bus_charge_rates(self):
+        for i, row in enumerate(self.charge_rate):
+            plt.plot(row, label=f"bus {i}")
+        plt.xlabel("hour of charge session")
+        plt.ylabel("power to deliver (kWh)")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
+    def plot_total_charge_rate(self):
+        totals = [0 for _ in self.charge_rate[0]]
+        for charge_rate in self.charge_rate:
+            for i, element in enumerate(charge_rate):
+                totals[i] += element
+        plt.plot(totals)
+        plt.xlabel("hour of charge session")
+        plt.ylabel("total power delivered (kWh)")
+        plt.grid(True)
+        plt.show()
+
+    def update_chargers(self, timestep) -> None:
         """
         update connector with charge rate and then
         deliver power to bus over timesteps
@@ -41,6 +62,8 @@ class rlDM(DecisionMaker):
         action, _ = self.model.predict(observation, deterministic=True)
         
         self.state.apply_action(action, verbose=True)
+        for i, act in enumerate(action):
+            self.charge_rate[i][timestep] = act
 
     def print_metrics(self):
         metrics = f"""
