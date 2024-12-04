@@ -139,7 +139,7 @@ class BusDepotEnv(gym.Env):
     def calculate_reward(self):
         unmet_soc_penalty = sum(
             max(0, bus.desired_soc - bus.current_soc()) for bus in self.sim_state.buses
-        )
+        ) / len(self.sim_state.buses)
         ideal_grid_pull = 0
         for bus in self.sim_state.buses:
             time_to_departure = max(0, int((bus.departure_time - self.sim_state.current_time).total_seconds() // 3600)) 
@@ -149,7 +149,7 @@ class BusDepotEnv(gym.Env):
                 ideal_grid_pull += (capacity - current_charge) // time_to_departure
 
         grid_pull, energy_price = self.sim_state.get_current_meterics()
-        rate_penalty = np.abs(ideal_grid_pull - grid_pull)
+        rate_penalty = np.abs(ideal_grid_pull - grid_pull) / len(self.sim_state.buses)
         energy_cost = grid_pull * energy_price
         return - unmet_soc_penalty - (energy_cost / 10) - rate_penalty # reward for being close to the naive approach
     
