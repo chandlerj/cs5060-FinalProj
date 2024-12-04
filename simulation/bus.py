@@ -10,7 +10,7 @@ class Bus():
         self.battery_capacity:    float         = battery_capacity
         self.__current_capacity:  float         = self.__init_curr_capacity()
         self.desired_soc:         int           = desired_soc
-        self.current_soc:         function      = lambda : int((self.__current_capacity / self.battery_capacity) * 100)
+        self.current_soc:         function      = lambda : ((self.__current_capacity / self.battery_capacity) * 100)
 
     
     def __init_curr_capacity(self, dist_center=150):

@@ -106,7 +106,6 @@ class Main:
                 break
 
 
-
 if __name__ == "__main__":
     if len(sys.argv) == 4:
 #                   decision maker  number of chargers  number of busses 
@@ -114,9 +113,7 @@ if __name__ == "__main__":
     else:
         main = Main("rule-based", 8, 16)
         print("DECISON MAKER METRICS")
-        main.d_maker.print_metrics()
-        main.sim_state.print_metrics()
     main.run_sim()
-    if type(main.d_maker) == rtsoDM or type(main.d_maker) == rlDM:
-        main.d_maker.plot_bus_charge_rates()
-        main.d_maker.plot_total_charge_rate()
+    main.d_maker.plot_bus_charge_rates()
+    main.d_maker.plot_total_charge_rate()
+

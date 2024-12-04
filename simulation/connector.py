@@ -15,7 +15,6 @@ class Connector:
         self.curr_power_delivery: float          = max_power        # current desired charge rate (Kw/H)
         self.timestep_scale:      int            = timestep_scale   # number of seconds each timestep represents
 
-
     def active(self) -> bool:
         return self.connected_to != None
 

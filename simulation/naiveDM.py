@@ -30,9 +30,11 @@ class NaiveDM(DecisionMaker):
                         # calculate lowest charge rate which will charge the bus by the desired end time
                         if hours_remaining == 0:
                             connector.update_charge_rate(0)
+                            self.charge_rate[bus.id].append(0)
                         else:
                             charge_rate = ((charge_needed * bus.battery_capacity) / hours_remaining) * 1000
                             connector.update_charge_rate(charge_rate)
+                            self.charge_rate[bus.id].append(charge_rate)
 
 
     def plot_bus_charge_rates(self):
@@ -45,7 +47,8 @@ class NaiveDM(DecisionMaker):
         plt.show()
     
     def plot_total_charge_rate(self):
-        totals = [0 for _ in self.charge_rate[0]]
+        largest_list = max([len(rate) for rate in self.charge_rate])
+        totals = [0 for _ in range(largest_list)]
         for charge_rate in self.charge_rate:
             for i, element in enumerate(charge_rate):
                 totals[i] += element
