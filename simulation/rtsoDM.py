@@ -11,7 +11,7 @@ class rtsoDM(DecisionMaker):
         self.num_buses          = len(self.state.buses)
         self.num_time_slots     = self.__get_num_time_slots()
         self.energy_demands     = self.__get_energy_demands()
-        self.grid_limit         = 1000 # TODO: arbitrary value, test best input
+        self.grid_limit         = 500 # TODO: arbitrary value, test best input
         self.time_slot_duration = 1   # TODO: another arbitrary value, currently assumes time slots are hours
         self.electricity_prices = self.state.price_schedule.price_schedule
         self.arrival_times, self.departure_times    = self.__get_bus_times()
@@ -115,7 +115,7 @@ class rtsoDM(DecisionMaker):
                     penalty += 1000 * charging_schedule[bus, t]
     
             if energy_delivered < energy_demands[bus]:
-                penalty += 1000 * (energy_demands[bus] - energy_delivered)  # Penalize unmet demand
+                penalty += 3000 * (energy_demands[bus] - energy_delivered)  # Penalize unmet demand
     
             total_cost += np.sum(charging_schedule[bus] * electricity_prices)
     

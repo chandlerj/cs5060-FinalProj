@@ -15,7 +15,7 @@ class SimState():
                  num_connectors=2,
                  num_buses=10,
                  min_power=0,
-                 max_power=100,
+                 max_power=120,
                  timestep_duration=1,
                  max_rate=0.24,
                  min_rate=0.08,
