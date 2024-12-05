@@ -58,7 +58,7 @@ class rlDM(DecisionMaker):
         deliver power to bus over timesteps
         """
         # Get the current observation
-        observation = self.env.envs[0].get_observation()  # Assuming single env
+        observation = self.env.envs[0].unwrapped.get_observation()  # Assuming single env
         action, _ = self.model.predict(observation, deterministic=True)
         
         self.state.apply_action(action, verbose=True)

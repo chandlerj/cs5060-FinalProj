@@ -16,6 +16,7 @@ class rtsoDM(DecisionMaker):
         self.electricity_prices = self.state.price_schedule.price_schedule
         self.arrival_times, self.departure_times    = self.__get_bus_times()
         self.charge_rate        = self.__get_charge_rates(self.__create_gene_space())
+        self.cost = 0.0
 
 
     def update_chargers(self, timesteps) -> None:
@@ -23,6 +24,10 @@ class rtsoDM(DecisionMaker):
         update connector with charge rate and then
         deliver power to bus over timesteps
         """
+        right_now = self.state.current_time 
+        curr_power_price = self.state.price_schedule.get_current_price(right_now)
+
+
         for _ in range(timesteps):
             rate_step = (self.state.current_time - self.state.start_schedule).seconds // 3600
             for i, bus in enumerate(self.state.buses):
@@ -31,7 +36,8 @@ class rtsoDM(DecisionMaker):
                     for connector in charger.connectors:
                         if connector.connected_to == bus:
                             connector.update_charge_rate(self.charge_rate[i, rate_step])
-                            connector.deliver_power(timesteps)
+                            power_delivered = connector.deliver_power(timesteps)
+                            self.cost += curr_power_price * power_delivered
 
 
     def print_metrics(self):

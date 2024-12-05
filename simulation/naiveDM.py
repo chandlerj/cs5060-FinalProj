@@ -7,13 +7,18 @@ class NaiveDM(DecisionMaker):
     def __init__(self, sim_state):
         super().__init__(sim_state)
         self.charge_rate = [[] for bus in self.state.buses]
+        self.cost = 0
 
     def update_chargers(self, timesteps) -> None:
         self.__calc_charge_rates()
+
+        right_now = self.state.current_time
+        curr_power_price = self.state.price_schedule.get_current_price(right_now)
+
         for charger in self.state.chargers:
             for connector in charger.connectors:
-                connector.deliver_power(timesteps)
-
+                power_delivered = connector.deliver_power(timesteps)
+                self.cost += curr_power_price * power_delivered        
     def __calc_charge_rates(self) -> None: 
         right_now = self.state.current_time
         for charger in self.state.chargers:
