@@ -117,6 +117,5 @@ if __name__ == "__main__":
     main.d_maker.plot_bus_charge_rates()
     main.d_maker.plot_total_charge_rate()
 
-    if type(main.d_maker) == rtsoDM or type(main.d_maker) == NaiveDM:
-        print(f"COST TO CHARGE: ${main.d_maker.cost}")
+    print(f"COST TO CHARGE: ${main.d_maker.cost}")
 

@@ -19,6 +19,7 @@ class rlDM(DecisionMaker):
         self.electricity_prices = self.state.price_schedule.price_schedule
         self.arrival_times, self.departure_times    = self.__get_bus_times()
         self.charge_rate        = self.__get_charge_rates()
+        self.cost               = 0.0
 
         # train the model upon initialization of the DM
         # Create environment
@@ -63,7 +64,9 @@ class rlDM(DecisionMaker):
         
         self.state.apply_action(action, verbose=True)
         for i, act in enumerate(action):
-            self.charge_rate[i][timestep] = act * self.state.max_power
+            charge_rate = act * self.state.max_power
+            self.charge_rate[i][timestep] = charge_rate
+            self.cost += charge_rate * self.electricity_prices[timestep]
 
     def print_metrics(self):
         metrics = f"""
