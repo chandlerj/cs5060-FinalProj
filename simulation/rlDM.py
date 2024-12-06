@@ -36,7 +36,7 @@ class rlDM(DecisionMaker):
         for i, row in enumerate(self.charge_rate):
             plt.plot(row, label=f"bus {i}")
         plt.xlabel("hour of charge session")
-        plt.ylabel("power to deliver (kWh)")
+        plt.ylabel("power to deliver (kW)")
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -63,7 +63,7 @@ class rlDM(DecisionMaker):
         
         self.state.apply_action(action, verbose=True)
         for i, act in enumerate(action):
-            self.charge_rate[i][timestep] = act
+            self.charge_rate[i][timestep] = act * self.state.max_power
 
     def print_metrics(self):
         metrics = f"""

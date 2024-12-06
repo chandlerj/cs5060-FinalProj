@@ -82,7 +82,7 @@ class Main:
 
         # Add labels, legend, and grid
         plt.xlabel('Timestep')
-        plt.ylabel('State of Charge (SOC)')
+        plt.ylabel('State of Charge (%)')
         plt.title('SOC vs Time for Each Bus')
         plt.legend()
         plt.grid(True)

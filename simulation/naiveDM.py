@@ -45,7 +45,7 @@ class NaiveDM(DecisionMaker):
         for i, row in enumerate(self.charge_rate):
             plt.plot(row, label=f"bus {i}")
         plt.xlabel("timestep of charge session")
-        plt.ylabel("power to deliver (KwH/hr)")
+        plt.ylabel("power to deliver (kW)")
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -58,7 +58,7 @@ class NaiveDM(DecisionMaker):
                 totals[i] += element
         plt.plot(totals)
         plt.xlabel("timestep of charge session")
-        plt.ylabel("total power delivered (KwH/hr)")
+        plt.ylabel("total power delivered (kW)")
         plt.grid(True)
         plt.show()
 

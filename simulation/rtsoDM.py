@@ -195,7 +195,7 @@ class rtsoDM(DecisionMaker):
                 totals[i] += element
         plt.plot(totals)
         plt.xlabel("hour of charge session")
-        plt.ylabel("total power delivered (kWh)")
+        plt.ylabel("total power delivered (kW)")
         plt.grid(True)
         plt.show()
 
